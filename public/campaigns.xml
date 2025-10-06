@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<campaigns>
+  <campaign>
+    <id>1</id>
+    <name>Summer Product Launch</name>
+    <sampleTweet>Excited to announce our new product line! 🚀 #Innovation #Tech #Launch</sampleTweet>
+    <numDevices>25</numDevices>
+    <startTime>2025-06-15T09:00:00</startTime>
+    <hashtags>Innovation,Tech,Launch</hashtags>
+    <targetGeography>North America</targetGeography>
+    <frequencyPattern>burst</frequencyPattern>
+    <status>completed</status>
+  </campaign>
+  <campaign>
+    <id>2</id>
+    <name>Weekend Flash Sale</name>
+    <sampleTweet>⚡ FLASH SALE! Limited time only - grab yours now! #Sale #Shopping</sampleTweet>
+    <numDevices>15</numDevices>
+    <startTime>2025-10-10T08:00:00</startTime>
+    <hashtags>Sale,Shopping,Deals</hashtags>
+    <targetGeography>Global</targetGeography>
+    <frequencyPattern>staggered</frequencyPattern>
+    <status>running</status>
+  </campaign>
+  <campaign>
+    <id>3</id>
+    <name>Product Demo Series</name>
+    <sampleTweet>Join us for live demos every hour! See our product in action. #Demo #Live</sampleTweet>
+    <numDevices>30</numDevices>
+    <startTime>2025-10-20T10:00:00</startTime>
+    <hashtags>Demo,Live,Tutorial</hashtags>
+    <targetGeography>Europe</targetGeography>
+    <frequencyPattern>repeating</frequencyPattern>
+    <status>scheduled</status>
+  </campaign>
+</campaigns>

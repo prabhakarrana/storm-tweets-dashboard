@@ -1,15 +1,18 @@
 import { Campaign } from "@/types/campaign";
 import { CampaignCard } from "@/components/CampaignCard";
 import { CreateCampaignDialog } from "@/components/CreateCampaignDialog";
-import { Zap } from "lucide-react";
+import { Zap, RefreshCw } from "lucide-react";
 import heroImage from "@/assets/twitter-blaster-hero.png";
+import { Button } from "@/components/ui/button";
 
 interface IndexProps {
   campaigns: Campaign[];
+  loading: boolean;
   onCreateCampaign: (campaign: Campaign) => void;
+  onReloadCampaigns: () => void;
 }
 
-const Index = ({ campaigns, onCreateCampaign }: IndexProps) => {
+const Index = ({ campaigns, loading, onCreateCampaign, onReloadCampaigns }: IndexProps) => {
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,23 +47,42 @@ const Index = ({ campaigns, onCreateCampaign }: IndexProps) => {
       </div>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Recent Campaigns</h2>
-          <p className="text-muted-foreground">Manage and track your Twitter storm campaigns</p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {campaigns.map((campaign) => (
-            <CampaignCard key={campaign.id} campaign={campaign} />
-          ))}
-        </div>
-        
-        {campaigns.length === 0 && (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg mb-4">
-              No campaigns yet. Create your first Twitter storm to get started!
-            </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold mb-2">Recent Campaigns</h2>
+            <p className="text-muted-foreground">Manage and track your Twitter storm campaigns from campaigns.xml</p>
           </div>
+          <Button 
+            onClick={onReloadCampaigns} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Reload from XML
+          </Button>
+        </div>
+        
+        {loading ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-lg">Loading campaigns from XML...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {campaigns.map((campaign) => (
+                <CampaignCard key={campaign.id} campaign={campaign} />
+              ))}
+            </div>
+            
+            {campaigns.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground text-lg mb-4">
+                  No campaigns yet. Create your first Twitter storm to get started!
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
