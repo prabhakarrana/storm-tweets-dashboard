@@ -326,14 +326,14 @@ export const BiometricLogin = () => {
 
               {/* Fingerprint */}
               <motion.svg
-                className="absolute inset-0 w-full h-full p-8"
-                viewBox="0 0 100 100"
+                className="absolute inset-0 w-full h-full p-6"
+                viewBox="0 0 64 64"
                 animate={scanState === "idle" ? { opacity: [0.3, 0.6, 0.3] } : { opacity: scanState === "success" ? 1 : 0.7 }}
                 transition={scanState === "idle" ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
               >
                 <g 
                   fill="none" 
-                  strokeWidth="2"
+                  strokeWidth="1.2"
                   strokeLinecap="round"
                   className={`transition-all duration-500 ${
                     scanState === "success" 
@@ -343,13 +343,31 @@ export const BiometricLogin = () => {
                       : "stroke-primary"
                   }`}
                 >
-                  <path d="M 50 42 Q 44 50 50 58 Q 56 66 50 70" />
-                  <path d="M 50 35 Q 38 45 38 55 Q 38 70 50 76" />
-                  <path d="M 50 35 Q 62 45 62 55 Q 62 70 50 76" />
-                  <path d="M 44 28 Q 28 40 28 55 Q 28 78 50 84" />
-                  <path d="M 56 28 Q 72 40 72 55 Q 72 78 50 84" />
-                  <path d="M 38 22 Q 18 36 18 55 Q 18 82 50 92" />
-                  <path d="M 62 22 Q 82 36 82 55 Q 82 82 50 92" />
+                  {/* Core whorl */}
+                  <path d="M32 28c-2 0-3.5 1.5-3.5 3.5s1.5 3.5 3.5 3.5" />
+                  <path d="M32 35c2.5 0 4.5-2 4.5-4.5S34.5 26 32 26" />
+                  
+                  {/* Inner ridges */}
+                  <path d="M32 24c-4.5 0-8 3.5-8 8s3.5 8 8 8" />
+                  <path d="M32 40c5 0 9-4 9-9s-4-9-9-9" />
+                  <path d="M28 21c-6 1-10 6-10 12s3 10 7 13" />
+                  <path d="M36 21c6 1 10 6 10 12s-3 10-7 13" />
+                  
+                  {/* Middle ridges with breaks */}
+                  <path d="M24 18c-8 3-12 10-12 16c0 5 2 9 5 12" />
+                  <path d="M40 18c8 3 12 10 12 16c0 5-2 9-5 12" />
+                  <path d="M21 15c-9 4-14 12-14 19c0 6 3 11 7 15" />
+                  <path d="M43 15c9 4 14 12 14 19c0 6-3 11-7 15" />
+                  
+                  {/* Outer ridges */}
+                  <path d="M18 13c-10 5-15 14-15 22c0 7 3 13 8 17" />
+                  <path d="M46 13c10 5 15 14 15 22c0 7-3 13-8 17" />
+                  
+                  {/* Characteristic ridge breaks/bifurcations */}
+                  <path d="M25 38c-1 2-1 4 0 6" />
+                  <path d="M39 38c1 2 1 4 0 6" />
+                  <path d="M30 44c1 2 2 3 4 3" />
+                  <path d="M34 44c-1 2-2 3-4 3" />
                 </g>
               </motion.svg>
 
