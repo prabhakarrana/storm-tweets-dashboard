@@ -90,9 +90,10 @@ export const BiometricLogin = () => {
         <img 
           src={worldMapSvg} 
           alt="" 
-          className="w-full h-full object-cover opacity-[0.04]"
+          className="w-full h-full object-cover opacity-[0.08]"
           style={{
-            filter: 'brightness(0) saturate(100%) invert(69%) sepia(89%) saturate(1234%) hue-rotate(152deg) brightness(101%) contrast(101%)'
+            filter: 'invert(1) brightness(0.5) sepia(1) hue-rotate(160deg) saturate(5)',
+            mixBlendMode: 'screen'
           }}
         />
       </div>
