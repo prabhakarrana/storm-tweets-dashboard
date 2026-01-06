@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Shield, Lock, User, AlertCircle } from "lucide-react";
 import fingerprintSvg from "@/assets/fingerprint-scan.svg";
+import worldMapSvg from "@/assets/world-map-vector.svg";
 
 type ScanState = "idle" | "scanning" | "success" | "error";
 
@@ -84,10 +85,22 @@ export const BiometricLogin = () => {
 
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center overflow-hidden">
+      {/* World map background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <img 
+          src={worldMapSvg} 
+          alt="" 
+          className="w-full h-full object-cover opacity-[0.04]"
+          style={{
+            filter: 'brightness(0) saturate(100%) invert(69%) sepia(89%) saturate(1234%) hue-rotate(152deg) brightness(101%) contrast(101%)'
+          }}
+        />
+      </div>
+
       {/* Animated background grid with pulse */}
       <motion.div 
-        className="absolute inset-0 opacity-[0.05]"
-        animate={{ opacity: [0.03, 0.07, 0.03] }}
+        className="absolute inset-0 opacity-[0.03]"
+        animate={{ opacity: [0.02, 0.05, 0.02] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         style={{
           backgroundImage: `
@@ -102,31 +115,27 @@ export const BiometricLogin = () => {
       <motion.div 
         className="absolute inset-0"
         animate={{ 
-          opacity: [0.2, 0.4, 0.2],
+          opacity: [0.15, 0.3, 0.15],
           scale: [1, 1.1, 1]
         }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.2) 0%, transparent 50%)'
+          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 50%)'
         }}
       />
 
-      {/* Horizontal scan lines */}
+      {/* Single horizontal scan line */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={`scanline-${i}`}
-            className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-            initial={{ top: '-5%' }}
-            animate={{ top: '105%' }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "linear",
-              delay: i * 2.5,
-            }}
-          />
-        ))}
+        <motion.div
+          className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+          initial={{ top: '-5%' }}
+          animate={{ top: '105%' }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        />
       </div>
 
       {/* Floating orbs */}
