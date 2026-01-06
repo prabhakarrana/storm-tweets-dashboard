@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Shield, Lock, User, AlertCircle } from "lucide-react";
+import fingerprintSvg from "@/assets/fingerprint-scan.svg";
 
 type ScanState = "idle" | "scanning" | "success" | "error";
 
@@ -325,51 +326,23 @@ export const BiometricLogin = () => {
               </svg>
 
               {/* Fingerprint */}
-              <motion.svg
-                className="absolute inset-0 w-full h-full p-6"
-                viewBox="0 0 64 64"
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center p-6"
                 animate={scanState === "idle" ? { opacity: [0.3, 0.6, 0.3] } : { opacity: scanState === "success" ? 1 : 0.7 }}
                 transition={scanState === "idle" ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
               >
-                <g 
-                  fill="none" 
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  className={`transition-all duration-500 ${
+                <img
+                  src={fingerprintSvg}
+                  alt="Fingerprint"
+                  className={`w-full h-full object-contain transition-all duration-500 ${
                     scanState === "success" 
-                      ? "stroke-green-400" 
+                      ? "[filter:brightness(0)_saturate(100%)_invert(65%)_sepia(52%)_saturate(636%)_hue-rotate(93deg)_brightness(95%)_contrast(88%)]" 
                       : scanState === "error"
-                      ? "stroke-destructive"
-                      : "stroke-primary"
+                      ? "[filter:brightness(0)_saturate(100%)_invert(27%)_sepia(91%)_saturate(6068%)_hue-rotate(354deg)_brightness(90%)_contrast(99%)]"
+                      : "[filter:brightness(0)_saturate(100%)_invert(76%)_sepia(64%)_saturate(462%)_hue-rotate(359deg)_brightness(99%)_contrast(102%)]"
                   }`}
-                >
-                  {/* Core whorl */}
-                  <path d="M32 28c-2 0-3.5 1.5-3.5 3.5s1.5 3.5 3.5 3.5" />
-                  <path d="M32 35c2.5 0 4.5-2 4.5-4.5S34.5 26 32 26" />
-                  
-                  {/* Inner ridges */}
-                  <path d="M32 24c-4.5 0-8 3.5-8 8s3.5 8 8 8" />
-                  <path d="M32 40c5 0 9-4 9-9s-4-9-9-9" />
-                  <path d="M28 21c-6 1-10 6-10 12s3 10 7 13" />
-                  <path d="M36 21c6 1 10 6 10 12s-3 10-7 13" />
-                  
-                  {/* Middle ridges with breaks */}
-                  <path d="M24 18c-8 3-12 10-12 16c0 5 2 9 5 12" />
-                  <path d="M40 18c8 3 12 10 12 16c0 5-2 9-5 12" />
-                  <path d="M21 15c-9 4-14 12-14 19c0 6 3 11 7 15" />
-                  <path d="M43 15c9 4 14 12 14 19c0 6-3 11-7 15" />
-                  
-                  {/* Outer ridges */}
-                  <path d="M18 13c-10 5-15 14-15 22c0 7 3 13 8 17" />
-                  <path d="M46 13c10 5 15 14 15 22c0 7-3 13-8 17" />
-                  
-                  {/* Characteristic ridge breaks/bifurcations */}
-                  <path d="M25 38c-1 2-1 4 0 6" />
-                  <path d="M39 38c1 2 1 4 0 6" />
-                  <path d="M30 44c1 2 2 3 4 3" />
-                  <path d="M34 44c-1 2-2 3-4 3" />
-                </g>
-              </motion.svg>
+                />
+              </motion.div>
 
               {/* Scan line */}
               <AnimatePresence>
