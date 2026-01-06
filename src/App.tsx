@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import { CampaignAnalytics } from "./pages/CampaignAnalytics";
+import BiometricLogin from "./pages/BiometricLogin";
 import NotFound from "./pages/NotFound";
 import { Campaign } from "./types/campaign";
 import { parseXMLToCampaigns, campaignsToXML, downloadXML } from "./utils/xmlParser";
@@ -53,6 +54,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<BiometricLogin />} />
             <Route 
               path="/" 
               element={
