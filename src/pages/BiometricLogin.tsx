@@ -1,158 +1,355 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { Shield, Lock, User, AlertCircle } from "lucide-react";
 
-type ScanState = "idle" | "scanning" | "success";
+type ScanState = "idle" | "scanning" | "success" | "error";
+
+const loginSchema = z.object({
+  username: z.string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(50, "Username must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(100, "Password must be less than 100 characters"),
+});
 
 const scanMessages = [
   "CAPTURING BIOMETRIC SIGNATURE",
-  "VALIDATING IDENTITY",
+  "VALIDATING CREDENTIALS",
+  "VERIFYING IDENTITY",
 ];
 
 export const BiometricLogin = () => {
   const navigate = useNavigate();
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [messageIndex, setMessageIndex] = useState(0);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
+
+  const validateInputs = (): boolean => {
+    const result = loginSchema.safeParse({ username, password });
+    
+    if (!result.success) {
+      const fieldErrors: { username?: string; password?: string } = {};
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as "username" | "password";
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return false;
+    }
+    
+    setErrors({});
+    return true;
+  };
 
   const handleAuthenticate = () => {
     if (scanState !== "idle") return;
     
+    if (!validateInputs()) {
+      setScanState("error");
+      setTimeout(() => setScanState("idle"), 1500);
+      return;
+    }
+    
     setScanState("scanning");
     setMessageIndex(0);
 
-    // Cycle through messages during scan
     const messageInterval = setInterval(() => {
       setMessageIndex((prev) => (prev + 1) % scanMessages.length);
-    }, 1200);
+    }, 1000);
 
-    // Complete scan after 3 seconds
     setTimeout(() => {
       clearInterval(messageInterval);
       setScanState("success");
       
-      // Auto-redirect after success
       setTimeout(() => {
         navigate("/");
       }, 2000);
     }, 3000);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && scanState === "idle") {
+      handleAuthenticate();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center overflow-hidden">
-      {/* Background grid effect */}
+      {/* Animated background grid */}
       <div 
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
-            linear-gradient(hsl(var(--primary) / 0.3) 1px, transparent 1px),
-            linear-gradient(90deg, hsl(var(--primary) / 0.3) 1px, transparent 1px)
+            linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)
           `,
-          backgroundSize: '50px 50px'
+          backgroundSize: '60px 60px'
+        }}
+      />
+      
+      {/* Radial glow */}
+      <div 
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 60%)'
         }}
       />
 
-      {/* Main glass panel */}
+      {/* Floating particles effect */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full"
+            style={{
+              left: `${15 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
+            }}
+            animate={{
+              y: [-20, 20, -20],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 4 + i,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.5,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main container */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="relative z-10 w-full max-w-md mx-4"
+        className="relative z-10 w-full max-w-lg mx-4"
       >
-        <div className="bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-8 shadow-2xl">
+        {/* Glass panel */}
+        <div className="relative bg-card/60 backdrop-blur-2xl border border-primary/20 rounded-3xl p-8 md:p-10 shadow-2xl overflow-hidden">
+          {/* Top accent line */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent" />
+          
+          {/* Corner accents */}
+          <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-primary/40 rounded-tl-lg" />
+          <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-primary/40 rounded-tr-lg" />
+          <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-primary/40 rounded-bl-lg" />
+          <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-primary/40 rounded-br-lg" />
+
           {/* Header */}
           <div className="text-center mb-8">
-            <motion.h1 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-2xl font-bold tracking-wider text-foreground mb-2"
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="flex items-center justify-center gap-3 mb-4"
             >
-              SECURE ACCESS
-            </motion.h1>
+              <div className="relative">
+                <Shield className="w-10 h-10 text-primary" />
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Shield className="w-10 h-10 text-primary blur-sm" />
+                </motion.div>
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-wider text-foreground">
+                  TWITTER BLASTER
+                </h1>
+                <p className="text-[10px] text-primary tracking-[0.3em] font-medium">
+                  COMMAND CENTER
+                </p>
+              </div>
+            </motion.div>
+            
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="text-xs text-muted-foreground tracking-widest"
+              transition={{ delay: 0.4 }}
+              className="flex items-center justify-center gap-2 text-xs text-muted-foreground tracking-widest"
             >
-              BIOMETRIC AUTHENTICATION REQUIRED
+              <div className="w-8 h-[1px] bg-gradient-to-r from-transparent to-muted-foreground/50" />
+              <span>SECURE AUTHENTICATION</span>
+              <div className="w-8 h-[1px] bg-gradient-to-l from-transparent to-muted-foreground/50" />
             </motion.div>
           </div>
 
+          {/* Input Fields */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-4 mb-6"
+          >
+            {/* Username */}
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <User className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="AGENT ID"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={scanState === "scanning" || scanState === "success"}
+                className={`
+                  w-full bg-background/50 border rounded-xl py-3 pl-11 pr-4
+                  text-sm tracking-wider placeholder:text-muted-foreground/50
+                  focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                  transition-all duration-300
+                  ${errors.username ? 'border-destructive' : 'border-border/50'}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              <AnimatePresence>
+                {errors.username && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute -bottom-5 left-0 text-xs text-destructive flex items-center gap-1"
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.username}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Password */}
+            <div className="relative mt-6">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                <Lock className="w-4 h-4" />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="ACCESS CODE"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={scanState === "scanning" || scanState === "success"}
+                className={`
+                  w-full bg-background/50 border rounded-xl py-3 pl-11 pr-12
+                  text-sm tracking-wider placeholder:text-muted-foreground/50
+                  focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary
+                  transition-all duration-300
+                  ${errors.password ? 'border-destructive' : 'border-border/50'}
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors text-xs tracking-wider"
+              >
+                {showPassword ? "HIDE" : "SHOW"}
+              </button>
+              <AnimatePresence>
+                {errors.password && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute -bottom-5 left-0 text-xs text-destructive flex items-center gap-1"
+                  >
+                    <AlertCircle className="w-3 h-3" />
+                    {errors.password}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
           {/* Fingerprint Scanner */}
-          <div className="flex flex-col items-center">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6 }}
-              className="relative w-48 h-48 mb-6"
-            >
-              {/* Circular scanner frame */}
-              <div 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="flex flex-col items-center mt-8"
+          >
+            <div className="relative w-36 h-36 mb-4">
+              {/* Outer ring */}
+              <motion.div 
                 className={`absolute inset-0 rounded-full border-2 transition-colors duration-500 ${
                   scanState === "success" 
                     ? "border-green-500/60" 
-                    : "border-primary/40"
+                    : scanState === "error"
+                    ? "border-destructive/60"
+                    : "border-primary/30"
                 }`}
+                animate={scanState === "scanning" ? { 
+                  boxShadow: ["0 0 0 0 hsl(var(--primary) / 0.3)", "0 0 0 10px hsl(var(--primary) / 0)", "0 0 0 0 hsl(var(--primary) / 0.3)"]
+                } : {}}
+                transition={{ duration: 1.5, repeat: scanState === "scanning" ? Infinity : 0 }}
               />
+              
+              {/* Inner ring */}
               <div 
-                className={`absolute inset-2 rounded-full border transition-colors duration-500 ${
+                className={`absolute inset-3 rounded-full border transition-colors duration-500 ${
                   scanState === "success" 
-                    ? "border-green-500/30" 
+                    ? "border-green-500/40" 
+                    : scanState === "error"
+                    ? "border-destructive/40"
                     : "border-primary/20"
                 }`}
               />
 
               {/* Corner brackets */}
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
-                <g className={`transition-colors duration-500 ${scanState === "success" ? "stroke-green-500" : "stroke-primary"}`} strokeWidth="2" fill="none">
-                  {/* Top-left */}
-                  <path d="M 30 50 L 30 30 L 50 30" opacity="0.6" />
-                  {/* Top-right */}
-                  <path d="M 150 30 L 170 30 L 170 50" opacity="0.6" />
-                  {/* Bottom-left */}
-                  <path d="M 30 150 L 30 170 L 50 170" opacity="0.6" />
-                  {/* Bottom-right */}
-                  <path d="M 150 170 L 170 170 L 170 150" opacity="0.6" />
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 150 150">
+                <g 
+                  className={`transition-colors duration-500 ${
+                    scanState === "success" ? "stroke-green-500" : 
+                    scanState === "error" ? "stroke-destructive" : "stroke-primary"
+                  }`} 
+                  strokeWidth="2" 
+                  fill="none"
+                  opacity="0.7"
+                >
+                  <path d="M 25 40 L 25 25 L 40 25" />
+                  <path d="M 110 25 L 125 25 L 125 40" />
+                  <path d="M 25 110 L 25 125 L 40 125" />
+                  <path d="M 110 125 L 125 125 L 125 110" />
                 </g>
               </svg>
 
-              {/* Fingerprint SVG */}
+              {/* Fingerprint */}
               <motion.svg
-                className="absolute inset-0 w-full h-full p-10"
+                className="absolute inset-0 w-full h-full p-8"
                 viewBox="0 0 100 100"
-                animate={scanState === "idle" ? { opacity: [0.4, 0.7, 0.4] } : {}}
-                transition={scanState === "idle" ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : {}}
+                animate={scanState === "idle" ? { opacity: [0.3, 0.6, 0.3] } : { opacity: scanState === "success" ? 1 : 0.7 }}
+                transition={scanState === "idle" ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
               >
                 <g 
                   fill="none" 
-                  strokeWidth="1.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   className={`transition-all duration-500 ${
                     scanState === "success" 
                       ? "stroke-green-400" 
+                      : scanState === "error"
+                      ? "stroke-destructive"
                       : "stroke-primary"
                   }`}
-                  style={{ opacity: scanState === "success" ? 1 : 0.8 }}
                 >
-                  {/* Center core */}
-                  <path d="M 50 45 Q 45 50 50 55 Q 55 60 50 65" />
-                  
-                  {/* Inner loops */}
-                  <path d="M 50 38 Q 40 45 40 55 Q 40 68 50 72" />
-                  <path d="M 50 38 Q 60 45 60 55 Q 60 68 50 72" />
-                  
-                  {/* Middle arcs */}
-                  <path d="M 45 30 Q 30 40 30 55 Q 30 75 50 80" />
-                  <path d="M 55 30 Q 70 40 70 55 Q 70 75 50 80" />
-                  
-                  {/* Outer arcs */}
-                  <path d="M 40 25 Q 22 35 22 55 Q 22 78 50 85" />
-                  <path d="M 60 25 Q 78 35 78 55 Q 78 78 50 85" />
-                  
-                  {/* Outermost arcs */}
-                  <path d="M 35 20 Q 15 32 15 55 Q 15 82 45 90" />
-                  <path d="M 65 20 Q 85 32 85 55 Q 85 82 55 90" />
+                  <path d="M 50 42 Q 44 50 50 58 Q 56 66 50 70" />
+                  <path d="M 50 35 Q 38 45 38 55 Q 38 70 50 76" />
+                  <path d="M 50 35 Q 62 45 62 55 Q 62 70 50 76" />
+                  <path d="M 44 28 Q 28 40 28 55 Q 28 78 50 84" />
+                  <path d="M 56 28 Q 72 40 72 55 Q 72 78 50 84" />
+                  <path d="M 38 22 Q 18 36 18 55 Q 18 82 50 92" />
+                  <path d="M 62 22 Q 82 36 82 55 Q 82 82 50 92" />
                 </g>
               </motion.svg>
 
@@ -160,40 +357,36 @@ export const BiometricLogin = () => {
               <AnimatePresence>
                 {scanState === "scanning" && (
                   <motion.div
-                    initial={{ top: "10%", opacity: 0 }}
-                    animate={{ top: "90%", opacity: [0, 1, 1, 0] }}
+                    initial={{ top: "15%", opacity: 0 }}
+                    animate={{ top: "85%", opacity: [0, 1, 1, 0] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1.5, repeat: 1, ease: "linear" }}
-                    className="absolute left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent"
-                    style={{ boxShadow: "0 0 20px hsl(var(--primary)), 0 0 40px hsl(var(--primary) / 0.5)" }}
+                    className="absolute left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"
+                    style={{ boxShadow: "0 0 15px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5)" }}
                   />
                 )}
               </AnimatePresence>
 
-              {/* Success glow */}
+              {/* Success/Error glow */}
               <AnimatePresence>
-                {scanState === "success" && (
+                {(scanState === "success" || scanState === "error") && (
                   <motion.div
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute inset-0 rounded-full"
                     style={{ 
-                      background: "radial-gradient(circle, hsl(142 76% 36% / 0.2) 0%, transparent 70%)",
-                      boxShadow: "inset 0 0 60px hsl(142 76% 36% / 0.1)"
+                      background: scanState === "success" 
+                        ? "radial-gradient(circle, hsl(142 76% 36% / 0.3) 0%, transparent 70%)"
+                        : "radial-gradient(circle, hsl(var(--destructive) / 0.3) 0%, transparent 70%)"
                     }}
                   />
                 )}
               </AnimatePresence>
-            </motion.div>
+            </div>
 
             {/* Status text */}
-            <motion.div 
-              className="h-6 mb-6 text-center"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-            >
+            <div className="h-5 mb-5 text-center">
               <AnimatePresence mode="wait">
                 {scanState === "idle" && (
                   <motion.p
@@ -201,9 +394,9 @@ export const BiometricLogin = () => {
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
-                    className="text-sm text-muted-foreground tracking-widest"
+                    className="text-xs text-muted-foreground tracking-[0.2em]"
                   >
-                    PLACE FINGER ON SENSOR
+                    BIOMETRIC VERIFICATION READY
                   </motion.p>
                 )}
                 {scanState === "scanning" && (
@@ -212,7 +405,7 @@ export const BiometricLogin = () => {
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
-                    className="text-sm text-primary tracking-widest"
+                    className="text-xs text-primary tracking-[0.2em]"
                   >
                     {scanMessages[messageIndex]}
                   </motion.p>
@@ -222,48 +415,73 @@ export const BiometricLogin = () => {
                     key="success"
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-sm text-green-400 tracking-widest"
+                    className="text-xs text-green-400 tracking-[0.2em]"
                   >
                     IDENTITY VERIFIED • ACCESS GRANTED
                   </motion.p>
                 )}
+                {scanState === "error" && (
+                  <motion.p
+                    key="error"
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-destructive tracking-[0.2em]"
+                  >
+                    VALIDATION FAILED • CHECK CREDENTIALS
+                  </motion.p>
+                )}
               </AnimatePresence>
-            </motion.div>
+            </div>
 
             {/* Authenticate button */}
             <motion.button
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.4 }}
+              transition={{ delay: 0.7 }}
               onClick={handleAuthenticate}
-              disabled={scanState !== "idle"}
+              disabled={scanState === "scanning" || scanState === "success"}
               className={`
-                px-8 py-3 rounded-lg font-medium tracking-wider text-sm
-                transition-all duration-300
-                ${scanState === "idle" 
-                  ? "bg-primary/20 border border-primary/50 text-primary hover:bg-primary/30 hover:border-primary cursor-pointer" 
+                relative px-10 py-3.5 rounded-xl font-medium tracking-[0.2em] text-sm
+                transition-all duration-300 overflow-hidden group
+                ${scanState === "idle" || scanState === "error"
+                  ? "bg-primary/10 border border-primary/50 text-primary hover:bg-primary/20 hover:border-primary hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] cursor-pointer" 
                   : scanState === "scanning"
-                  ? "bg-muted border border-border text-muted-foreground cursor-not-allowed"
+                  ? "bg-muted/50 border border-border text-muted-foreground cursor-not-allowed"
                   : "bg-green-500/20 border border-green-500/50 text-green-400 cursor-default"
                 }
               `}
             >
-              {scanState === "idle" && "AUTHENTICATE"}
-              {scanState === "scanning" && "SCANNING..."}
-              {scanState === "success" && "ACCESS GRANTED"}
+              <span className="relative z-10">
+                {scanState === "idle" && "INITIATE AUTHENTICATION"}
+                {scanState === "error" && "RETRY AUTHENTICATION"}
+                {scanState === "scanning" && "PROCESSING..."}
+                {scanState === "success" && "ACCESS GRANTED"}
+              </span>
+              {(scanState === "idle" || scanState === "error") && (
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0"
+                  animate={{ x: ["-100%", "100%"] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                />
+              )}
             </motion.button>
-          </div>
+          </motion.div>
 
-          {/* Footer info */}
+          {/* Footer */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9 }}
-            className="mt-8 pt-6 border-t border-border/30 text-center"
+            className="mt-8 pt-6 border-t border-border/20"
           >
-            <p className="text-xs text-muted-foreground/60 tracking-wide">
-              ENCRYPTED BIOMETRIC PROTOCOL v3.2
-            </p>
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground/50 tracking-wider">
+              <span>PROTOCOL v4.2.1</span>
+              <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${scanState === "success" ? "bg-green-500" : "bg-primary"} animate-pulse`} />
+                <span>SYSTEM ACTIVE</span>
+              </div>
+              <span>AES-256 ENCRYPTED</span>
+            </div>
           </motion.div>
         </div>
       </motion.div>
