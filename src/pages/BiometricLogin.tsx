@@ -84,9 +84,11 @@ export const BiometricLogin = () => {
 
   return (
     <div className="fixed inset-0 bg-background flex items-center justify-center overflow-hidden">
-      {/* Animated background grid */}
-      <div 
-        className="absolute inset-0 opacity-[0.03]"
+      {/* Animated background grid with pulse */}
+      <motion.div 
+        className="absolute inset-0 opacity-[0.05]"
+        animate={{ opacity: [0.03, 0.07, 0.03] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         style={{
           backgroundImage: `
             linear-gradient(hsl(var(--primary)) 1px, transparent 1px),
@@ -96,36 +98,142 @@ export const BiometricLogin = () => {
         }}
       />
       
-      {/* Radial glow */}
-      <div 
-        className="absolute inset-0 opacity-30"
+      {/* Animated radial glow */}
+      <motion.div 
+        className="absolute inset-0"
+        animate={{ 
+          opacity: [0.2, 0.4, 0.2],
+          scale: [1, 1.1, 1]
+        }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.15) 0%, transparent 60%)'
+          background: 'radial-gradient(ellipse at center, hsl(var(--primary) / 0.2) 0%, transparent 50%)'
         }}
       />
 
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(6)].map((_, i) => (
+      {/* Horizontal scan lines */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(3)].map((_, i) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
-            style={{
-              left: `${15 + i * 15}%`,
-              top: `${20 + (i % 3) * 25}%`,
-            }}
-            animate={{
-              y: [-20, 20, -20],
-              opacity: [0.2, 0.5, 0.2],
-            }}
+            key={`scanline-${i}`}
+            className="absolute left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+            initial={{ top: '-5%' }}
+            animate={{ top: '105%' }}
             transition={{
-              duration: 4 + i,
+              duration: 8,
               repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.5,
+              ease: "linear",
+              delay: i * 2.5,
             }}
           />
         ))}
+      </div>
+
+      {/* Floating orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={`orb-${i}`}
+            className="absolute rounded-full blur-xl"
+            style={{
+              width: `${80 + i * 40}px`,
+              height: `${80 + i * 40}px`,
+              left: `${10 + i * 20}%`,
+              top: `${15 + (i % 3) * 30}%`,
+              background: `radial-gradient(circle, hsl(var(--primary) / 0.15) 0%, transparent 70%)`,
+            }}
+            animate={{
+              x: [0, 30, -20, 0],
+              y: [-20, 20, -10, -20],
+              scale: [1, 1.2, 0.9, 1],
+              opacity: [0.3, 0.6, 0.4, 0.3],
+            }}
+            transition={{
+              duration: 10 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 1.5,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Digital circuit lines */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
+        <motion.path
+          d="M 0 200 Q 200 180 400 200 T 800 200"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          fill="none"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.path
+          d="M 0 400 Q 300 380 600 400 T 1200 400"
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          fill="none"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        />
+      </svg>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute w-1 h-1 bg-primary rounded-full"
+            style={{
+              left: `${5 + (i * 7) % 90}%`,
+              top: `${10 + (i * 11) % 80}%`,
+            }}
+            animate={{
+              y: [-30, 30, -30],
+              x: [-10, 10, -10],
+              opacity: [0.2, 0.8, 0.2],
+              scale: [0.5, 1.2, 0.5],
+            }}
+            transition={{
+              duration: 5 + (i % 4),
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.3,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Corner tech decorations */}
+      <div className="absolute top-8 left-8 w-32 h-32 border-l border-t border-primary/20 pointer-events-none">
+        <motion.div 
+          className="absolute top-0 left-0 w-2 h-2 bg-primary rounded-full"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+      </div>
+      <div className="absolute top-8 right-8 w-32 h-32 border-r border-t border-primary/20 pointer-events-none">
+        <motion.div 
+          className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+        />
+      </div>
+      <div className="absolute bottom-8 left-8 w-32 h-32 border-l border-b border-primary/20 pointer-events-none">
+        <motion.div 
+          className="absolute bottom-0 left-0 w-2 h-2 bg-primary rounded-full"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+        />
+      </div>
+      <div className="absolute bottom-8 right-8 w-32 h-32 border-r border-b border-primary/20 pointer-events-none">
+        <motion.div 
+          className="absolute bottom-0 right-0 w-2 h-2 bg-primary rounded-full"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 2, repeat: Infinity, delay: 1.5 }}
+        />
       </div>
 
       {/* Main container */}
@@ -339,7 +447,7 @@ export const BiometricLogin = () => {
                       ? "[filter:brightness(0)_saturate(100%)_invert(65%)_sepia(52%)_saturate(636%)_hue-rotate(93deg)_brightness(95%)_contrast(88%)]" 
                       : scanState === "error"
                       ? "[filter:brightness(0)_saturate(100%)_invert(27%)_sepia(91%)_saturate(6068%)_hue-rotate(354deg)_brightness(90%)_contrast(99%)]"
-                      : "[filter:brightness(0)_saturate(100%)_invert(76%)_sepia(64%)_saturate(462%)_hue-rotate(359deg)_brightness(99%)_contrast(102%)]"
+                      : "[filter:brightness(0)_saturate(100%)_invert(74%)_sepia(98%)_saturate(1284%)_hue-rotate(166deg)_brightness(101%)_contrast(101%)]"
                   }`}
                 />
               </motion.div>
